@@ -26,32 +26,38 @@ app.post('/', (req, res)=>{
         res.status(200)
         res.send()
     }else{
-        const { template, phone, headers, values } = body
-        axios.post(cred.wame.url, 
-        {
-            countryCode: "+91",
-            phoneNumber: phone,
-            type: "Template",
-            template: {
-                name: template,
-                languageCode: "en",
-                headerValues: headers || [],
-                bodyValues: values || []
-            }
-        },
-        {
-            headers: {
-                'content-type': 'text/json',
-                Authorization: cred.wame.auth
-            }
-        }).then(r => {
-            const time = moment()
-            webhookStore[r.data.id]={ time, res }
-        })
-        .catch(err => {
-            res.status(err.response.status)
-            res.send(err.response.data.message)
-        })
+
+        var reqAPIKey = req.get("api-key")
+        if(cred.apiKey == reqAPIKey){
+            const { template, phone, headers, values } = body
+            axios.post(cred.wame.url, 
+            {
+                countryCode: "+91",
+                phoneNumber: phone,
+                type: "Template",
+                template: {
+                    name: template,
+                    languageCode: "en",
+                    headerValues: headers || [],
+                    bodyValues: values || []
+                }
+            },
+            {
+                headers: {
+                    'content-type': 'text/json',
+                    Authorization: cred.wame.auth
+                }
+            }).then(r => {
+                const time = moment()
+                webhookStore[r.data.id]={ time, res }
+            })
+            .catch(err => {
+                res.status(err.response.status)
+                res.send(err.response.data.message)
+            })
+        }else{
+            res.status(401).send("API Key mismatch")
+        }
     }
 })
 
