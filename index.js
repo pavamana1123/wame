@@ -23,11 +23,11 @@ app.post('/', (req, res)=>{
         res.status(200)
         res.send()
     }else{
-        const { template, headers, values } = body
+        const { template, phone, headers, values } = body
         axios.post(cred.wame.url, 
         {
             countryCode: "+91",
-            phoneNumber,
+            phone,
             type: "Template",
             template: {
                 name: template,
