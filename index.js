@@ -28,7 +28,7 @@ app.post('/', (req, res)=>{
         axios.post(cred.wame.url, 
         {
             countryCode: "+91",
-            phone,
+            phoneNumber: phone,
             type: "Template",
             template: {
                 name: template,
