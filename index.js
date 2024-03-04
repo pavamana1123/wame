@@ -20,7 +20,7 @@ app.post('/', (req, res)=>{
             if(webhookStore[id]){
                 const status = data.message.message_status
                 webhookStore[id].res.status(status=="Sent"?200:500).send(status)
-                webhookStore.delete(id) 
+                delete webhookStore[id]
             }
         }
         res.status(200)
