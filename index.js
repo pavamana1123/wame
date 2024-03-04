@@ -72,7 +72,7 @@ setInterval(()=>{
         if(moment().diff(resObj.time, 'minutes')>=2){
             resObj.res.status(408)
             resObj.res.send()
-            webhookStore.delete(id)
+            delete webhookStore[id]
         }
     })
 }, 60*1000)
