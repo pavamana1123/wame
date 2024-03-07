@@ -1,6 +1,12 @@
+const moment = require("moment")
+const consolas = console.log
+console.log = function (...args) {
+  const timestamp = new Date().toISOString()
+  consolas.apply(console, [`[${moment(timestamp).format("YY-MMM-DD HH:mm")}]`, ...args])
+}
+
 const express = require('express')
 const axios = require('axios')
-const moment = require('moment')
 
 const app = express()
 app.use(express.json()) 
@@ -8,8 +14,11 @@ const port = 4004
 
 var cred = require("./cred.js")
 
+const TelegramBot = require('node-telegram-bot-api')
+const bot = new TelegramBot(cred.telebot.botToken, {polling: false})
+
 app.post('/', (req, res)=>{
-    const { body, query } = req
+    const { body } = req
 
         var reqAPIKey = req.get("api-key")
         if(cred.apiKey == reqAPIKey){
@@ -31,11 +40,15 @@ app.post('/', (req, res)=>{
                     'content-type': 'text/json',
                     Authorization: cred.wame.auth
                 }
-            }).then(r => {
+            }).then(() => {
+                console.log(`${phone} > ${template}: ${headers}/${values}`)
                 res.status(200)
                 res.send()
             })
             .catch(err => {
+                bot.sendMessage(cred.telebot.apiChatID, `[Wame Error] ${err}`)
+                console.log(`${err}`)
+
                 res.status(err.response.status)
                 res.send(err.response.data.message)
             })
