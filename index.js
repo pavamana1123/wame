@@ -37,7 +37,7 @@ app.post('/', (req, res) => {
         }
 
         if(buttons){
-            payload.buttonValues = buttons
+            payload.template.buttonValues = buttons
         }
 
         axios.post(cred.wame.url, payload,
