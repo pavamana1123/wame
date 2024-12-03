@@ -1,6 +1,12 @@
+const moment = require("moment")
+const consolas = console.log
+console.log = function (...args) {
+  const timestamp = new Date().toISOString()
+  consolas.apply(console, [`[${moment(timestamp).format("YY-MMM-DD HH:mm")}]`, ...args])
+}
+
 const express = require('express')
 const axios = require('axios')
-const moment = require('moment')
 
 const app = express()
 app.use(express.json()) 
@@ -8,24 +14,11 @@ const port = 4004
 
 var cred = require("./cred.js")
 
-var webhookStore = {}
+const TelegramBot = require('node-telegram-bot-api')
+const bot = new TelegramBot(cred.telebot.botToken, {polling: false})
 
 app.post('/', (req, res)=>{
-    const { body, query } = req
-
-    if(query.status=="sent"){
-        const { data, type } = req.body
-        if(type=="message_api_sent"){
-            const id = data.message.id
-            if(webhookStore[id]){
-                const status = data.message.message_status
-                webhookStore[id].res.status(status=="Sent"?200:500).send(status)
-                delete webhookStore[id]
-            }
-        }
-        res.status(200)
-        res.send()
-    }else{
+    const { body } = req
 
         var reqAPIKey = req.get("api-key")
         if(cred.apiKey == reqAPIKey){
@@ -48,32 +41,24 @@ app.post('/', (req, res)=>{
                     'content-type': 'text/json',
                     Authorization: cred.wame.auth
                 }
-            }).then(r => {
-                const time = moment()
-                webhookStore[r.data.id]={ time, res }
+            }).then(() => {
+                console.log(`${phone} > ${template}: ${headers}/${values}`)
+                res.status(200)
+                res.send()
             })
             .catch(err => {
+                bot.sendMessage(cred.telebot.apiChatID, `[Wame Error] ${err}`)
+                console.log(`${err}`)
+
                 res.status(err.response.status)
                 res.send(err.response.data.message)
             })
         }else{
             res.status(401).send("API Key mismatch")
         }
-    }
+    
 })
 
 app.listen(port, () => {
     console.log(`wame app listening at http://localhost:${port}`)
 })
-
-
-setInterval(()=>{
-    Object.keys(webhookStore).forEach(id=>{
-        var resObj = webhookStore[id]
-        if(moment().diff(resObj.time, 'minutes')>=2){
-            resObj.res.status(408)
-            resObj.res.send()
-            delete webhookStore[id]
-        }
-    })
-}, 60*1000)
