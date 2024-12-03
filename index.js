@@ -29,7 +29,7 @@ app.post('/', (req, res)=>{
 
         var reqAPIKey = req.get("api-key")
         if(cred.apiKey == reqAPIKey){
-            const { template, phone, headers, values } = body
+            const { template, phone, headers, values, buttons } = body
             axios.post(cred.wame.url, 
             {
                 countryCode: "+91",
@@ -39,7 +39,8 @@ app.post('/', (req, res)=>{
                     name: template,
                     languageCode: "en",
                     headerValues: headers || [],
-                    bodyValues: values || []
+                    bodyValues: values || [],
+                    buttonValues: buttons || {} 
                 }
             },
             {
